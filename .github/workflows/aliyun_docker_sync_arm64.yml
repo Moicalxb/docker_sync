@@ -47,9 +47,12 @@ jobs:
           CUSTOM_TAG="${{ github.event.inputs.target_tag }}"
           
           echo "Processing Source Image正在处理源镜像: $SOURCE_IMAGE"
+          
+          # 把 SOURCE_IMAGE 写入环境变量，供后续步骤使用
+          echo "SOURCE_IMAGE=$SOURCE_IMAGE" >> $GITHUB_ENV
 
-          # --- 2. 拉取源镜像 ---
-          docker pull  --platform linux/arm64  $SOURCE_IMAGE
+          # --- 2. 拉取源镜像 (指定 ARM64 架构) ---
+          docker pull --platform linux/arm64 $SOURCE_IMAGE
 
           # --- 3. 解析镜像名称和标签 ---
           # 提取源镜像的 Tag，如果源镜像没写Tag，默认是 latest
@@ -93,7 +96,7 @@ jobs:
       # 3. 结果摘要
       - name: Summary
         run: |
-          docker inspect $SOURCE_IMAGE | grep -i architecture
+          docker inspect ${{ env.SOURCE_IMAGE }} | grep -i architecture
           echo "Image Sync Finished." >> $GITHUB_STEP_SUMMARY
           echo "Source Image: ${{ github.event.inputs.source_image }}" >> $GITHUB_STEP_SUMMARY
           echo "Target Image: ${{ env.FINAL_MIRROR_IMAGE }}" >> $GITHUB_STEP_SUMMARY
