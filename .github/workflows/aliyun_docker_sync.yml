@@ -49,7 +49,7 @@ jobs:
           echo "Processing Source Image正在处理源镜像: $SOURCE_IMAGE"
 
           # --- 2. 拉取源镜像 ---
-          docker pull $SOURCE_IMAGE
+          docker pull  --platform linux/arm64  $SOURCE_IMAGE
 
           # --- 3. 解析镜像名称和标签 ---
           # 提取源镜像的 Tag，如果源镜像没写Tag，默认是 latest
@@ -78,7 +78,7 @@ jobs:
           fi
 
           # 拼接最终的阿里云地址
-          NEW_IMAGE="${{ env.DEST_REGISTRY }}/${{ env.NAMESPACE }}/${TARGET_NAME}:${TARGET_TAG}"
+          NEW_IMAGE="${{ env.DEST_REGISTRY }}/${{ env.NAMESPACE }}/${TARGET_NAME}:${TARGET_TAG}-arm64"
 
           echo "Rename Image as: $NEW_IMAGE"
           echo "FINAL_MIRROR_IMAGE=$NEW_IMAGE" >> $GITHUB_ENV
@@ -93,6 +93,7 @@ jobs:
       # 3. 结果摘要
       - name: Summary
         run: |
+          docker inspect $SOURCE_IMAGE | grep -i architecture
           echo "Image Sync Finished." >> $GITHUB_STEP_SUMMARY
           echo "Source Image: ${{ github.event.inputs.source_image }}" >> $GITHUB_STEP_SUMMARY
           echo "Target Image: ${{ env.FINAL_MIRROR_IMAGE }}" >> $GITHUB_STEP_SUMMARY
